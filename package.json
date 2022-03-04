@@ -1,0 +1,36 @@
+{
+  "name": "mini-shippers-rest-api",
+  "version": "1.0.0",
+  "description": "Shippers REST API",
+  "scripts": {
+    "test": "jest -i"
+  },
+  "jest": {
+    "displayName": "Unit tests",
+    "testMatch": [
+      "<rootDir>/__tests__/*.test.js"
+    ],
+    "globalSetup": "<rootDir>/__tests__/global-setup.js",
+    "collectCoverage": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/walterbester/mini-shippers-rest-api.git"
+  },
+  "author": "Walter Bester",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/walterbester/mini-shippers-rest-api/issues"
+  },
+  "homepage": "https://github.com/walterbester/mini-shippers-rest-api#readme",
+  "dependencies": {
+    "ajv": "^8.10.0",
+    "knex": "^1.0.3",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "aws-sdk": "^2.1084.0",
+    "jest": "^27.5.1"
+  }
+}

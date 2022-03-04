@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "properties": {
+    "OrderId": {
+      "type": "string",
+      "description": "Unique identifier for an order"
+    },
+    "RequestedPickupTime": {
+      "type": "string",
+      "pattern": "[0-9][0-9][0-9][0-9]\/[0-9][0-9]\/[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]",
+      "description": "Pick up time for the order"
+    },
+    "PickupAddress": {
+      "type": "object",
+      "properties": {
+        "Unit": {
+          "type": "string",
+          "description": "Pick up address - street number"
+        },
+        "Street": {
+          "type": "string",
+          "description": "Pick up address - street name"
+        },
+        "Suburb": {
+          "type": "string",
+          "description": "Pick up address - suburb"
+        },
+        "City": {
+          "type": "string",
+          "description": "Pick up address - city"
+        },
+        "PostCode": {
+          "type": "string",
+          "description": "Pick up address - postal code",
+          "pattern": "^[0-9]{4}$"
+        }
+      }
+    },
+    "DeliveryAddress": {
+      "type": "object",
+      "properties": {
+        "Unit": {
+          "type": "string",
+          "description": "Drop off address - street number"
+        },
+        "Street": {
+          "type": "string",
+          "description": "Drop off address - street name"
+        },
+        "Suburb": {
+          "type": "string",
+          "description": "Drop off address - suburb"
+        },
+        "City": {
+          "type": "string",
+          "description": "Drop off address - city"
+        },
+        "PostCode": {
+          "type": "string",
+          "description": "Drop off address - postal code",
+          "pattern": "^[0-9]{4}$"
+        }
+      }
+    },
+    "Items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ItemCode": {
+            "type": "string",
+            "description": "Item code of unit needing delivery"
+          },
+          "Quantity": {
+            "type": "integer",
+            "description": "Quantity of unit needing delivery"
+          }
+        }
+      }
+    },
+    "PickupInstructions": {
+      "type": "string",
+      "description": "Specific pickup instructions"
+    },
+    "DeliveryInstructions": {
+      "type": "string",
+      "description": "Specific delivery instructions"
+    }
+  },
+  "required": ["OrderId", "Items"],
+  "additionalProperties": false
+}
