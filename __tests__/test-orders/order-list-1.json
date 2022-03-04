@@ -1,0 +1,30 @@
+{
+  "OrderId": "CH-1000-CREATE",
+  "RequestedPickupTime": "2022/02/03 07:00:00",
+  "PickupAddress": {
+    "Unit": "14",
+    "Street": "Happy Valley Road",
+    "Suburb": "Sunshine Place",
+    "City": "Springfield",
+    "Postcode": "1023"
+  },
+  "DeliveryAddress": {
+    "Unit": "66",
+    "Street": "Over the hill street",
+    "Suburb": "Mountaintop Place",
+    "City": "Shelbyville",
+    "Postcode": "2013"
+  },
+  "Items": [
+    {
+      "ItemCode": "AMZ-01",
+      "Quantity": 20
+    },
+    {
+      "ItemCode": "XYZ-02",
+      "Quantity": 5
+    }
+  ],
+  "PickupInstructions": "Ensure driver signs in before heading to the loading bay",
+  "DeliveryInstructions": "Items are fragile, take extra care when unloading"
+}
