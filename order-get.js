@@ -1,4 +1,16 @@
 const {knex} = require('./database-client');
+const {apiGatewayOkResponse, apiGatewayErrorResponse} = require('./api-gateway-responses');
+
+function parseResult(result) {
+  if (!result.length) {
+    throw {message: 'Order not found', statusCode: 404};
+  }
+
+  return {
+    statusCode: 200,
+    result: result[0].order_doc
+  };
+}
 
 function getOrder(orderId) {
   return knex('orders')
@@ -6,21 +18,16 @@ function getOrder(orderId) {
     .select('order_doc');
 }
 
-function getId(event) {
-  return event.pathParameters.id;
+async function getId(event) {
+  return event.pathParameters.orderId;
 }
 
 async function handler(event) {
-  const orderId = getId(event);
-
-  const order = await getOrder(orderId)
-    .then(res => res[0]);
-  
-  if (!order) {
-    throw new Error(JSON.stringify({message: 'Order not found', statusCode: 404}));
-  }
-
-  return order;
+  return getId(event)
+    .then(getOrder)
+    .then(parseResult)
+    .then(apiGatewayOkResponse)
+    .catch(apiGatewayErrorResponse);
 }
 
 module.exports = {

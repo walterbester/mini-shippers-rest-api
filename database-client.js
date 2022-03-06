@@ -3,7 +3,7 @@ const knex = getConnection();
 
 async function getConnectionConfig() {
   const secretsManager = new AWS.SecretsManager({
-    region: process.env.AWS_REGION
+    endpoint: process.env.SECRETS_MANAGER_ENDPOINT
   });
 
   const config = secretsManager.getSecretValue({
