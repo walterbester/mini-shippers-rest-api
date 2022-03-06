@@ -38,18 +38,15 @@ test('Get available orders', async () => {
     order2
   ];
 
-  expect(result.length).toBe(2);
-  expect(result).toEqual(expectedResult);
+  expect(JSON.parse(result.body).length).toBe(2);
+  expect(JSON.parse(result.body)).toEqual(expectedResult);
 });
 
-test('No available orders throws', async () => {
+test('No available orders returns 404', async () => {
   await knex('orders').del();
 
   // Ensure the throw expect is asserted
   expect.assertions(1);
-  await handler(apiGatewayEvent)
-    .catch(error => {
-      const parsedError = JSON.parse(error.message);
-      expect(parsedError.statusCode).toBe(404);
-    });
+  const result = await handler(apiGatewayEvent);
+  expect(result.statusCode).toBe(404);
 });

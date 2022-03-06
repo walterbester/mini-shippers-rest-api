@@ -1,19 +1,35 @@
+const {knex} = require('../database-client');
 const {rollbackDatabase, setupDatabase} = require('../db/index');
 const AWS = require('aws-sdk');
 
-process.env.AWS_REGION = 'ap-southeast-2';
+process.env.AWS_REGION = 'us-east-1';
 process.env.SECRETS_MANAGER_ENDPOINT = 'http://localhost:4566';
 process.env.DATABASE_SECRET_NAME = 'database_credentials';
 
-function createSecret(secretName, secret) {
+async function createSecret(secretName, secret) {
   const secretsManager = new AWS.SecretsManager({
-    region: process.env.AWS_REGION
+    endpoint: process.env.SECRETS_MANAGER_ENDPOINT
   });
 
-  return secretsManager.createSecret({
-    Name: secretName,
-    SecretString: JSON.stringify(secret)
-  });
+  // If the secret already exists, delete it so it can be recreated
+  await secretsManager
+    .deleteSecret({
+      ForceDeleteWithoutRecovery: true,
+      SecretId: secretName
+    })
+    .promise()
+    .catch(error => {
+      if (error.code !== 'ResourceNotFoundException') {
+        throw error;
+      }
+    });
+
+  return secretsManager
+    .createSecret({
+      Name: secretName,
+      SecretString: JSON.stringify(secret)
+    })
+    .promise();
 }
 
 module.exports = async () => {
@@ -28,18 +44,12 @@ module.exports = async () => {
   // Create database secret in secrets manager
   await createSecret(process.env.DATABASE_SECRET_NAME, databaseSecret);
 
-  // Create global database connection to set up the database
-  const databaseConnection = await require('knex')({
-    client: 'mysql',
-    connection: databaseSecret
-  });
-
   // Ensure database is clean
-  await rollbackDatabase(databaseConnection);
+  await rollbackDatabase();
 
   // Set up database with latest migrations
-  await setupDatabase(databaseConnection);
+  await setupDatabase();
 
   // Clean up connection pool
-  await databaseConnection.destroy();
+  await knex.destroy();
 }

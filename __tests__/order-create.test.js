@@ -36,34 +36,24 @@ test('Create order with valid schema succeeds', async () => {
     .select('order_doc');
 
   expect(JSON.parse(expectedResult[0].order_doc)).toEqual(order);
-});
+}, 1000000);
 
-test('Create order with invalid schema throws', async () => {
+test('Create order with invalid schema returns 400', async () => {
   const apiGatewayEvent = {
     ...genericApiGatewayEvent,
     body: JSON.stringify(brokenOrder)
   };
 
-  // Ensure the throw expect is asserted
-  expect.assertions(1);
-  await handler(apiGatewayEvent)
-    .catch(error => {
-      const parsedError = JSON.parse(error.message);
-      expect(parsedError.statusCode).toBe(400);
-    });
+  const result = await handler(apiGatewayEvent);
+  expect(result.statusCode).toBe(400);
 });
 
-test('Create order with invalid body throws', async () => {
+test('Create order with invalid body returns 400', async () => {
   const apiGatewayEvent = {
     ...genericApiGatewayEvent,
-    body: 'This should throw'
+    body: 'This should return 400'
   };
 
-  // Ensure the throw expect is asserted
-  expect.assertions(1);
-  await handler(apiGatewayEvent)
-    .catch(error => {
-      const parsedError = JSON.parse(error.message);
-      expect(parsedError.statusCode).toBe(400);
-    });
+  const result = await handler(apiGatewayEvent);
+  expect(result.statusCode).toBe(400);
 });
