@@ -1,0 +1,170 @@
+openapi: 3.0.0
+info:
+  version: '1.0'
+  title: mini-shippers-test
+  description: API definitions for the shippers REST API
+paths:
+  /:
+    post:
+      summary: Create an order
+      tags:
+        - Orders
+      requestBody:
+        content:
+          application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+      responses:
+        201:
+          description: Order Created
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Bad Request
+        403:
+          description: Not Authorized
+    get:
+      summary: Get all available orders
+      tags:
+        - Orders
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        400:
+          description: Bad Request
+        403:
+          description: Not Authorized
+        404:
+          description: Not Found
+  /{orderId}:
+    get:
+      summary: Get specific order
+      tags:
+        - Orders
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        400:
+          description: Bad Request
+        403:
+          description: Not Authorized
+        404:
+          description: Not Found
+  /db/setup:
+    post:
+      summary: Set up the database with all required tables
+      tags:
+        - Database setup
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /db/rollback:
+    post:
+      summary: Roll back the database to the original state
+      tags:
+        - Database setup
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+security:
+- LambdaAuthorizer: []
+components:
+  securitySchemes:
+    LambdaAuthorizer:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: custom
+  schemas:
+    Order:
+      type: object
+      properties:
+        OrderId:
+          type: string
+          description: Unique identifier for an order
+        RequestedPickupTime:
+          type: string
+          pattern: '[0-9][0-9][0-9]\/[0-9][0-9]\/[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9]'
+          description: Pick up time for the order
+        PickupAddress:
+          type: object
+          properties:
+            Unit:
+              type: string
+              description: Pick up address - street number
+            Street:
+              type: string
+              description: Pick up address - street name
+            Suburb:
+              type: string
+              description: Pick up address - suburb
+            City:
+              type: string
+              description: Pick up address - city
+            PostCode:
+              type: string
+              description: Pick up address - postal code
+              pattern: ^[0-9]{4}$
+        DeliveryAddress:
+          type: object
+          properties:
+            Unit:
+              type: string
+              description: Drop off address - street number
+            Street:
+              type: string
+              description: Drop off address - street name
+            Suburb:
+              type: string
+              description: Drop off address - suburb
+            City:
+              type: string
+              description: Drop off address - city
+            PostCode:
+              type: string
+              description: Drop off address - postal code
+              pattern: ^[0-9]4$
+        Items:
+          type: array
+          items:
+            type: object
+            properties:
+              ItemCode:
+                type: string
+                description: Item code of unit needing delivery
+              Quantity:
+                type: integer
+                description: Quantity of unit needing delivery
+        PickupInstructions:
+          type: string
+          description: Specific pickup instructions
+        DeliveryInstructions:
+          type: string
+          description: Specific delivery instructions
+
