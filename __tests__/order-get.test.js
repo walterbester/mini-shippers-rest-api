@@ -48,3 +48,13 @@ test('Get order with invalid order id returns 404', async () => {
   const result = await handler(apiGatewayEvent);
   expect(result.statusCode).toBe(404);
 });
+
+test('Get order with no order id returns 400', async () => {
+  const apiGatewayEvent = {
+    ...genericApiGatewayEvent,
+    pathParameters: null,
+  };
+
+  const result = await handler(apiGatewayEvent);
+  expect(result.statusCode).toBe(400);
+});
