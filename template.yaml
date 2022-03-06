@@ -1,0 +1,180 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: mini-shippers-rest-api
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  DatabaseSecretArnParameter:
+    Type: String
+    Description: Enter the database secret ARN that was created in the deployment steps
+    Default:
+
+Globals:
+  Function:
+    VpcConfig:
+      SecurityGroupIds:
+        -
+      SubnetIds:
+        -
+
+Resources:
+  # API Gateway
+  ShipperApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Dev
+      Auth:
+        Authorizers:
+          LambdaAuthorizer:
+            FunctionArn: !GetAtt AuthorizerFunction.Arn
+
+  # Lambda authorizer
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: authorizer.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Lambda authorizer
+
+  # Lambda function for creating database schema
+  SetupDatabaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: database-setup.setup
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DatabaseSecretArnParameter
+      MemorySize: 128
+      Timeout: 100
+      Description: GET endpoint to retrieve a single order
+      Environment:
+        Variables:
+          DATABASE_SECRET_NAME: 'database_credentials'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShipperApi
+            Path: /db/setup/
+            Method: POST
+            Auth:
+              Authorizer: LambdaAuthorizer
+
+    # Lambda function for order-get.js
+  RollbackDatabaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: database-setup.rollback
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DatabaseSecretArnParameter
+      MemorySize: 128
+      Timeout: 100
+      Description: GET endpoint to retrieve a single order
+      Environment:
+        Variables:
+          DATABASE_SECRET_NAME: 'database_credentials'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShipperApi
+            Path: /db/rollback/
+            Method: POST
+            Auth:
+              Authorizer: LambdaAuthorizer
+
+  # Lambda function for order-get.js
+  GetOrderByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: order-get.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DatabaseSecretArnParameter
+      MemorySize: 128
+      Timeout: 100
+      Description: GET endpoint to retrieve a single order
+      Environment:
+        Variables:
+          DATABASE_SECRET_NAME: 'database_credentials'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShipperApi
+            Path: /{orderId}
+            Method: GET
+            Auth:
+              Authorizer: LambdaAuthorizer
+
+  # Lambda function for order-list.js
+  GetAllOrdersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: order-list.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DatabaseSecretArnParameter
+      MemorySize: 128
+      Timeout: 100
+      Description: GET endpoint to retrieve all available orders
+      Environment:
+        Variables:
+          DATABASE_SECRET_NAME: 'database_credentials'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShipperApi
+            Path: /
+            Method: GET
+            Auth:
+              Authorizer: LambdaAuthorizer
+
+  # Lambda function for order-create.js
+  PutItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: order-create.handler
+      Runtime: nodejs14.x
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref DatabaseSecretArnParameter
+      MemorySize: 128
+      Timeout: 100
+      Description: POST endpoint to create a new order
+      Environment:
+        Variables:
+          DATABASE_SECRET_NAME: 'database_credentials'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShipperApi
+            Path: /
+            Method: POST
+            Auth:
+              Authorizer: LambdaAuthorizer
+
+Outputs:
+  WebEndpoint:
+    Description: "API Gateway endpoint URL for Dev stage"
+    Value: !Sub "https://${ShipperApi}.execute-api.${AWS::Region}.amazonaws.com/Dev/"

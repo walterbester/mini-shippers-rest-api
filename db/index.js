@@ -7,7 +7,7 @@ exports.rollbackDatabase = async (databaseConnection) => {
   if (databaseConnection) {
     knex = databaseConnection;
   } else {
-    knex = require('../database-client');
+    knex = require('../database-client').knex;
   }
 
   return knex.migrate.rollback({directory: path.join(__dirname, './migrations')});
@@ -20,7 +20,7 @@ exports.setupDatabase = async (databaseConnection) => {
   if (databaseConnection) {
     knex = databaseConnection;
   } else {
-    knex = require('../database-client');
+    knex = require('../database-client').knex;
   }
 
   return knex.migrate.latest({directory: path.join(__dirname, './migrations')});
